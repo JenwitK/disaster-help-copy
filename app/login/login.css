@@ -1,0 +1,235 @@
+/* Login Page Styles */
+/* Inherits variables from landing.css via RootLayout */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background);
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(239, 68, 68, 0.05) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(239, 68, 68, 0.05) 0%, transparent 20%);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-layout {
+  width: 100%;
+  max-width: 420px;
+  /* Slightly narrower than register for login */
+  z-index: 10;
+}
+
+/* ===== Card ===== */
+.auth-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 48px 40px;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 0.5);
+  text-align: center;
+  position: relative;
+}
+
+/* ปุ่มกลับ */
+.back-link {
+  position: absolute;
+  top: 24px;
+  left: 32px;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.back-link:hover {
+  color: var(--primary);
+}
+
+/* ไอคอน */
+.auth-header {
+  margin-bottom: 32px;
+}
+
+.auth-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: var(--primary-light);
+  border-radius: 20px;
+  color: var(--primary);
+  margin-bottom: 24px;
+}
+
+.auth-logo .logo-icon {
+  width: 32px;
+  height: 32px;
+  background-color: var(--primary);
+}
+
+.auth-card h1 {
+  margin: 0 0 8px 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+/* ===== ฟอร์ม ===== */
+.form-group {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  outline: none;
+  font-size: 1rem;
+  background: white;
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+
+.form-group input::placeholder {
+  color: #9ca3af;
+}
+
+/* hover */
+.form-group input:hover {
+  border-color: var(--text-muted);
+}
+
+/* focus */
+.form-group input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+/* ===== ปุ่มเข้าสู่ระบบ ===== */
+.auth-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px;
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  color: white;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  transition: all 0.3s ease;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+}
+
+.auth-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== ล่างสุด ===== */
+.auth-footer {
+  margin-top: 24px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.auth-footer a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ===== Error text ===== */
+.auth-error {
+  color: var(--primary);
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+  background: var(--primary-light);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  padding-right: 48px;
+}
+
+/* ปุ่มตา */
+.eye-btn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.eye-btn:hover {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 32px 24px;
+  }
+}
