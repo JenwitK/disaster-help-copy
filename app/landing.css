@@ -318,9 +318,9 @@ body {
 }
 
 .feature-icon {
-  font-size: 3rem;
   margin-bottom: 24px;
   background: var(--primary-light);
+  color: var(--primary);
   width: 80px;
   height: 80px;
   display: flex;

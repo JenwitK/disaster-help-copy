@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import "./login.css";
 import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,11 +25,9 @@ export default function LoginPage() {
       password,
     });
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-      // Swal can be kept for major success/errors, but inline error is better for UX on fail
       Swal.fire({
         icon: "error",
         title: "เข้าสู่ระบบไม่สำเร็จ",
@@ -39,6 +38,27 @@ export default function LoginPage() {
     }
 
     if (data.user) {
+      // ตรวจสอบสถานะการอนุมัติสำหรับอาสาสมัคร
+      const { data: userInfo } = await supabase
+        .from("users_app")
+        .select("is_approved, role")
+        .eq("id", data.user.id)
+        .single();
+
+      if (userInfo && userInfo.is_approved === false) {
+        await supabase.auth.signOut();
+        setLoading(false);
+        setError("บัญชีของคุณยังรอการอนุมัติจาก Admin กรุณารอการยืนยัน");
+        Swal.fire({
+          icon: "warning",
+          title: "รอการอนุมัติ",
+          text: "บัญชีอาสาสมัครของคุณยังไม่ได้รับการอนุมัติจาก Admin กรุณารอการยืนยัน",
+          confirmButtonColor: "#ef4444",
+        });
+        return;
+      }
+
+      setLoading(false);
       Swal.fire({
         icon: "success",
         title: "เข้าสู่ระบบสำเร็จ",
@@ -97,7 +117,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label="toggle password"
                 >
-                  {showPassword ? "👁️" : "🔒"}
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
               </div>
             </div>

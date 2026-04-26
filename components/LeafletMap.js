@@ -1,6 +1,8 @@
 "use client";
 import Swal from "sweetalert2";
+import { Siren, User, Phone, MapPin, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   MapContainer,
   TileLayer,
@@ -73,6 +75,7 @@ export default function LeafletMap({
 }) {
   const [mounted, setMounted] = useState(false);
   const [position, setPosition] = useState(initialPosition || null);
+  const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
 
   const markerRefs = useRef({}); // 👈 เก็บ ref ของ marker แต่ละอัน
 
@@ -84,6 +87,17 @@ export default function LeafletMap({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!lightbox.open) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setLightbox(l => ({ ...l, open: false }));
+      if (e.key === 'ArrowRight') setLightbox(l => ({ ...l, index: (l.index + 1) % l.images.length }));
+      if (e.key === 'ArrowLeft') setLightbox(l => ({ ...l, index: (l.index - 1 + l.images.length) % l.images.length }));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightbox.open, lightbox.images.length]);
 
   useEffect(() => {
     if (initialPosition) {
@@ -133,6 +147,7 @@ export default function LeafletMap({
   );
 
   return (
+    <>
     <MapContainer
       center={center}
       zoom={13}
@@ -182,20 +197,41 @@ export default function LeafletMap({
             <Popup className="custom-popup">
               <div className="popup-container">
                 <div className="popup-header">
-                  <span className="popup-icon">🚨</span>
+                  <span className="popup-icon"><Siren size={18} /></span>
                   <h3 className="popup-title">{item.title || "เหตุฉุกเฉิน"}</h3>
                 </div>
 
                 <div className="popup-body">
-                  <p className="popup-desc">{item.description || "ไม่มีรายละเอียด"}</p>
+                  {item.description && (
+                    <p className="popup-desc">{item.description}</p>
+                  )}
+
+                  {/* รูปภาพ */}
+                  {item.incident_media?.length > 0 && (
+                    <div className="popup-images">
+                      {item.incident_media.map((media, idx) => (
+                        <button
+                          key={media.id}
+                          className="popup-image-link"
+                          onClick={() => setLightbox({
+                            open: true,
+                            images: item.incident_media.map(m => m.file_url),
+                            index: idx
+                          })}
+                        >
+                          <img src={media.file_url} alt="" className="popup-image" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="popup-meta">
                     <div className="meta-row">
-                      <span className="meta-icon">👤</span>
+                      <span className="meta-icon"><User size={14} /></span>
                       <span>{reporterName}</span>
                     </div>
                     <div className="meta-row">
-                      <span className="meta-icon">📞</span>
+                      <span className="meta-icon"><Phone size={14} /></span>
                       <span>{reporterPhone}</span>
                     </div>
                     <div className="meta-row">
@@ -223,12 +259,68 @@ export default function LeafletMap({
       {position && (
         <Marker position={[position.lat, position.lng]} icon={defaultIcon}>
           <Popup>
-            📍 พิกัดที่เลือก <br />
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+              <MapPin size={14} /> พิกัดที่เลือก
+            </span>
             Lat: {position.lat.toFixed(6)} <br />
             Lng: {position.lng.toFixed(6)}
           </Popup>
         </Marker>
       )}
     </MapContainer>
+
+    {/* Lightbox — rendered via portal to escape stacking context */}
+    {lightbox.open && createPortal(
+      <div className="lightbox-overlay" onClick={() => setLightbox(l => ({ ...l, open: false }))}>
+
+        <button className="lightbox-close" onClick={() => setLightbox(l => ({ ...l, open: false }))}>
+          <X size={20} />
+        </button>
+
+        <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+
+          <div className="lightbox-image-row">
+            {lightbox.images.length > 1 && (
+              <button
+                className="lightbox-nav"
+                onClick={() => setLightbox(l => ({ ...l, index: (l.index - 1 + l.images.length) % l.images.length }))}
+              >
+                <ChevronLeft size={24} />
+              </button>
+            )}
+
+            <img
+              src={lightbox.images[lightbox.index]}
+              alt=""
+              className="lightbox-img"
+            />
+
+            {lightbox.images.length > 1 && (
+              <button
+                className="lightbox-nav"
+                onClick={() => setLightbox(l => ({ ...l, index: (l.index + 1) % l.images.length }))}
+              >
+                <ChevronRight size={24} />
+              </button>
+            )}
+          </div>
+
+          {lightbox.images.length > 1 && (
+            <div className="lightbox-dots">
+              {lightbox.images.map((_, i) => (
+                <button
+                  key={i}
+                  className={`lightbox-dot ${i === lightbox.index ? 'active' : ''}`}
+                  onClick={() => setLightbox(l => ({ ...l, index: i }))}
+                />
+              ))}
+            </div>
+          )}
+
+        </div>
+      </div>,
+      document.body
+    )}
+    </>
   );
 }

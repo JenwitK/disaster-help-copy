@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import { Eye, EyeOff, Ambulance } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -65,16 +66,29 @@ export default function RegisterPage() {
         return;
       }
 
-      Swal.fire({
-        icon: "success",
-        title: "สมัครสมาชิกสำเร็จ",
-        text: "โปรดล๊อกอินเพื่อเข้าใช้งาน",
-        confirmButtonText: "ตกลง",
-        confirmButtonColor: "#ef4444",
-      }).then(() => {
-        router.push("/login");
-        router.refresh();
-      });
+      if (form.isVolunteer) {
+        Swal.fire({
+          icon: "info",
+          title: "สมัครสมาชิกสำเร็จ",
+          html: "<b>บัญชีอาสาสมัครของคุณถูกสร้างแล้ว</b><br/>กรุณารอการอนุมัติจาก Admin ก่อนจึงจะสามารถเข้าสู่ระบบได้",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#ef4444",
+        }).then(() => {
+          router.push("/login");
+          router.refresh();
+        });
+      } else {
+        Swal.fire({
+          icon: "success",
+          title: "สมัครสมาชิกสำเร็จ",
+          text: "โปรดล๊อกอินเพื่อเข้าใช้งาน",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#ef4444",
+        }).then(() => {
+          router.push("/login");
+          router.refresh();
+        });
+      }
 
     } catch (err) {
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
@@ -154,7 +168,7 @@ export default function RegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label="toggle password"
                 >
-                  {showPassword ? "👁️" : "🔒"}
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
               </div>
             </div>
@@ -176,7 +190,7 @@ export default function RegisterPage() {
                   onClick={() => setShowConfirm(!showConfirm)}
                   aria-label="toggle password"
                 >
-                  {showConfirm ? "👁️" : "🔒"}
+                  {showConfirm ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
               </div>
             </div>
@@ -191,7 +205,7 @@ export default function RegisterPage() {
                 style={{ width: 'auto', margin: 0 }}
               />
               <label htmlFor="isVolunteer" style={{ margin: 0, cursor: 'pointer', color: 'var(--text-main)' }}>
-                ลงทะเบียนเป็นอาสาสมัครกู้ภัย 🚑
+                ลงทะเบียนเป็นอาสาสมัครกู้ภัย <Ambulance size={16} style={{ display: 'inline', verticalAlign: 'middle' }} />
               </label>
             </div>
 

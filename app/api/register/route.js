@@ -38,7 +38,8 @@ export async function POST(req) {
           id: user.id,
           full_name: name,
           email: email,
-          role: isVolunteer ? "volunteer" : "user", // ✅ Set role based on checkbox
+          role: isVolunteer ? "volunteer" : "user",
+          is_approved: isVolunteer ? false : true,
           password: password,
           phone_number: phone
         },

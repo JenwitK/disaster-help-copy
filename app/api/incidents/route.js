@@ -12,6 +12,7 @@ export async function GET() {
         title,
         description,
         status,
+        approval_status,
         lat,
         lng,
         created_at,
@@ -26,6 +27,10 @@ export async function GET() {
           users_app (
             full_name
           )
+        ),
+        incident_media (
+          id,
+          file_url
         )
       `)
       .order("created_at", { ascending: false });
@@ -69,6 +74,7 @@ export async function POST(req) {
           title,
           description: description || "",
           status: "รอการช่วยเหลือ",
+          approval_status: "pending",
           lat,
           lng,
         },
@@ -93,22 +99,66 @@ export async function POST(req) {
   }
 }
 
-// 👉 อัปเดตสถานะ incident
+// 👉 ลบ incident
+export async function DELETE(req) {
+  try {
+    const body = await req.json();
+    const { id } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "ไม่มี id" }, { status: 400 });
+    }
+
+    await supabase.from("assignments").delete().eq("incident_id", id);
+    await supabase.from("incident_logs").delete().eq("incident_id", id);
+    await supabase.from("incident_media").delete().eq("incident_id", id);
+
+    const { error } = await supabase.from("incidents").delete().eq("id", id);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Server error:", err);
+    return NextResponse.json({ error: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์" }, { status: 500 });
+  }
+}
+
+// 👉 อัปเดต incident (status หรือ content)
 export async function PATCH(req) {
   try {
     const body = await req.json();
-    const { id, status } = body;
+    const { id, status, title, description, lat, lng, deleteMediaIds } = body;
 
-    if (!id || !status) {
-      return NextResponse.json(
-        { error: "ข้อมูลไม่ครบถ้วน (id, status)" },
-        { status: 400 }
-      );
+    if (!id) {
+      return NextResponse.json({ error: "ไม่มี id" }, { status: 400 });
+    }
+
+    const updates = {};
+    if (status !== undefined) updates.status = status;
+    if (title !== undefined) updates.title = title;
+    if (description !== undefined) updates.description = description;
+    if (lat !== undefined) updates.lat = lat;
+    if (lng !== undefined) updates.lng = lng;
+
+    if (Object.keys(updates).length === 0 && !deleteMediaIds?.length) {
+      return NextResponse.json({ error: "ไม่มีข้อมูลที่ต้องอัปเดต" }, { status: 400 });
+    }
+
+    // ลบรูปที่เลือก
+    if (deleteMediaIds?.length) {
+      await supabase.from("incident_media").delete().in("id", deleteMediaIds);
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ success: true });
     }
 
     const { data, error } = await supabase
       .from("incidents")
-      .update({ status })
+      .update(updates)
       .eq("id", id)
       .select();
 

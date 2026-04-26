@@ -206,13 +206,17 @@
 /* ปุ่มตา */
 .eye-btn {
   position: absolute;
-  right: 16px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  opacity: 0.5;
+  color: var(--text-muted);
+  opacity: 0.6;
   transition: opacity 0.2s;
   background: none;
   border: none;
@@ -221,38 +225,6 @@
 
 .eye-btn:hover {
   opacity: 1;
-}
-
-/* Icon logic for eye can be improved or keep using CSS shapes if preferred, 
-   but simplistic CSS shapes might look off. 
-   Let's use a simpler SVG or keeps custom CSS if it works well.
-   The previous CSS was complex for an eye. Let's simplify or use an icon class if available.
-   For now keeping broadly compatible. */
-
-
-
-/* Simple CSS Eye Icon Construction */
-.eye-btn {
-  border: 2px solid var(--text-muted);
-  border-radius: 75% 15%;
-  transform: rotate(45deg) translateY(-50%);
-  /* Adjust positioning logic */
-  right: 12px;
-  top: 40%;
-  height: 12px;
-  width: 12px;
-}
-
-.eye-btn::before {
-  content: '';
-  display: block;
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: var(--text-muted);
-  border-radius: 50%;
-  top: 2px;
-  left: 2px;
 }
 
 /* Responsive */
