@@ -38,7 +38,6 @@ export default function LoginPage() {
     }
 
     if (data.user) {
-      // ตรวจสอบสถานะการอนุมัติสำหรับอาสาสมัคร
       const { data: userInfo } = await supabase
         .from("users_app")
         .select("is_approved, role")

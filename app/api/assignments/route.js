@@ -42,7 +42,6 @@ export async function POST(req) {
     }
 }
 
-// 👉 อัปเดตสถานะ assignment
 export async function PATCH(req) {
     try {
         const body = await req.json();

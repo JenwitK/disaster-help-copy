@@ -2,7 +2,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "../../lib/supabaseServer";
 
-// 👉 ดึง incidents ทั้งหมด พร้อมชื่อผู้รายงาน
 export async function GET() {
   try {
     const { data, error } = await supabase
@@ -53,7 +52,6 @@ export async function GET() {
   }
 }
 
-// 👉 เพิ่ม incident ใหม่
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -99,7 +97,6 @@ export async function POST(req) {
   }
 }
 
-// 👉 ลบ incident
 export async function DELETE(req) {
   try {
     const body = await req.json();
@@ -126,7 +123,6 @@ export async function DELETE(req) {
   }
 }
 
-// 👉 อัปเดต incident (status หรือ content)
 export async function PATCH(req) {
   try {
     const body = await req.json();
@@ -147,7 +143,6 @@ export async function PATCH(req) {
       return NextResponse.json({ error: "ไม่มีข้อมูลที่ต้องอัปเดต" }, { status: 400 });
     }
 
-    // ลบรูปที่เลือก
     if (deleteMediaIds?.length) {
       await supabase.from("incident_media").delete().in("id", deleteMediaIds);
     }

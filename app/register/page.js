@@ -54,7 +54,7 @@ export default function RegisterPage() {
           email: form.email,
           password: form.password,
           phone: form.phone,
-          isVolunteer: form.isVolunteer // ส่งค่า checkbox ไป
+          isVolunteer: form.isVolunteer
         }),
       });
 

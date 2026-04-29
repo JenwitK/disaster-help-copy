@@ -15,7 +15,6 @@ import "leaflet/dist/leaflet.css";
 import "./LeafletMap.css";
 import L from "leaflet";
 
-// แก้ปัญหา marker ไม่ขึ้นใน Next.js
 const defaultIcon = L.icon({
   iconUrl: "/leaflet/marker-icon.png",
   iconRetinaUrl: "/leaflet/marker-icon-2x.png",
@@ -26,7 +25,6 @@ const defaultIcon = L.icon({
   shadowSize: [41, 41],
 });
 
-// คอมโพเนนต์จับ event คลิกบนแผนที่
 function LocationPicker({ onPick }) {
   useMapEvents({
     click(e) {
@@ -37,15 +35,13 @@ function LocationPicker({ onPick }) {
   return null;
 }
 
-// ✅ คอมโพเนนต์เอาไว้สั่งซูม + เปิด popup
 function FlyToIncident({ incident, markerRefs }) {
   const map = useMap();
 
   useEffect(() => {
-    // 👇 ถ้าไม่มี incident = โหมด "ยกเลิกเลือก"
     if (!incident) {
-      map.closePopup(); // ปิด popup ทั้งหมด
-      map.flyTo([13.7563, 100.5018], 13, { duration: 0.8 }); // กลับไปกรุงเทพ (หรือ center ที่อยากได้)
+      map.closePopup();
+      map.flyTo([13.7563, 100.5018], 13, { duration: 0.8 });
       return;
     }
 
@@ -71,13 +67,13 @@ export default function LeafletMap({
   onSelectLocation,
   initialPosition,
   incidents,
-  selectedIncidentId, // 👈 เพิ่มตัวนี้
+  selectedIncidentId,
 }) {
   const [mounted, setMounted] = useState(false);
   const [position, setPosition] = useState(initialPosition || null);
   const [lightbox, setLightbox] = useState({ open: false, images: [], index: 0 });
 
-  const markerRefs = useRef({}); // 👈 เก็บ ref ของ marker แต่ละอัน
+  const markerRefs = useRef({});
 
   const thailandBounds = [
     [5.6, 97.3],
@@ -159,13 +155,11 @@ export default function LeafletMap({
 
       <LocationPicker onPick={handlePick} />
 
-      {/* ✅ ซูมไป + เปิด popup เมื่อเลือก incident */}
       <FlyToIncident
         incident={selectedIncident}
         markerRefs={markerRefs}
       />
 
-      {/* หมุดจากฐานข้อมูล incidents */}
       {incidents.map((item) => {
         if (
           item.lat == null ||
@@ -206,7 +200,6 @@ export default function LeafletMap({
                     <p className="popup-desc">{item.description}</p>
                   )}
 
-                  {/* รูปภาพ */}
                   {item.incident_media?.length > 0 && (
                     <div className="popup-images">
                       {item.incident_media.map((media, idx) => (
@@ -255,7 +248,6 @@ export default function LeafletMap({
         );
       })}
 
-      {/* หมุดตำแหน่งที่ผู้ใช้เลือก */}
       {position && (
         <Marker position={[position.lat, position.lng]} icon={defaultIcon}>
           <Popup>
@@ -269,7 +261,6 @@ export default function LeafletMap({
       )}
     </MapContainer>
 
-    {/* Lightbox — rendered via portal to escape stacking context */}
     {lightbox.open && createPortal(
       <div className="lightbox-overlay" onClick={() => setLightbox(l => ({ ...l, open: false }))}>
 

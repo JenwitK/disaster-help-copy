@@ -25,11 +25,11 @@ export default function DashboardPage() {
 
     const [showAllReports, setShowAllReports] = useState(false);
     const [showRescueModal, setShowRescueModal] = useState(false);
-    const [rescueTab, setRescueTab] = useState('waiting'); // waiting, in_progress, completed
+    const [rescueTab, setRescueTab] = useState('waiting');
     const [search, setSearch] = useState("");
     const [rescueSearch, setRescueSearch] = useState("");
-    const [sortOrder, setSortOrder] = useState("newest"); // 'newest' | 'oldest'
-    const [userRole, setUserRole] = useState("user"); // 'user' | 'volunteer' | 'admin'
+    const [sortOrder, setSortOrder] = useState("newest");
+    const [userRole, setUserRole] = useState("user");
     const [isGettingLocation, setIsGettingLocation] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -155,7 +155,6 @@ export default function DashboardPage() {
         callback();
     };
 
-    // ✅ เช็ก session
     useEffect(() => {
         const initAuth = async () => {
             const { data, error } = await supabase.auth.getSession();
@@ -169,7 +168,6 @@ export default function DashboardPage() {
             if (data.session?.user) {
                 setUser(data.session.user);
 
-                // Fetch Role
                 const { data: userData, error: userError } = await supabase
                     .from("users_app")
                     .select("role")
@@ -181,7 +179,6 @@ export default function DashboardPage() {
                 }
             }
 
-            // ไม่ redirect — guest ดูแผนที่ได้โดยไม่ต้อง login
             setCheckingAuth(false);
         };
 
@@ -206,7 +203,6 @@ export default function DashboardPage() {
 
     const handleSaveProfile = async () => {
         try {
-            // 1) อัปเดต email / password
             if (users_app.email || users_app.password) {
                 const { data, error } = await supabase.auth.updateUser({
                     email: users_app.email || undefined,
@@ -219,7 +215,6 @@ export default function DashboardPage() {
                 }
             }
 
-            // 2) อัปเดตชื่อ
             if (users_app.full_name) {
                 const { error } = await supabase
                     .from("users_app")
@@ -247,7 +242,6 @@ export default function DashboardPage() {
         }
     };
 
-    // Incidents ที่ผ่านการอนุมัติแล้ว (Admin เห็นทั้งหมด)
     const visibleIncidents = userRole === 'admin'
         ? incidents
         : incidents.filter(i => i.approval_status === 'approved');
@@ -261,16 +255,10 @@ export default function DashboardPage() {
         );
     });
 
-    // Rescue Stats & Filter
     const stats = {
         waiting: visibleIncidents.filter(i => !i.status || i.status === 'รอการช่วยเหลือ').length,
         in_progress: visibleIncidents.filter(i => i.status === 'กำลังดำเนินการ').length,
-        completed: visibleIncidents.filter(i => {
-            if (i.status !== 'ช่วยเหลือสำเร็จ') return false;
-            const itemDate = new Date(i.created_at).toDateString();
-            const today = new Date().toDateString();
-            return itemDate === today;
-        }).length
+        completed: visibleIncidents.filter(i => i.status === 'ช่วยเหลือสำเร็จ').length
     };
 
     const rescueFilteredIncidents = visibleIncidents.filter(item => {
@@ -280,13 +268,7 @@ export default function DashboardPage() {
         if (rescueTab === 'in_progress') targetStatus = 'กำลังดำเนินการ';
         if (rescueTab === 'completed') targetStatus = 'ช่วยเหลือสำเร็จ';
 
-        let matchesStatus = (status === targetStatus);
-
-        if (rescueTab === 'completed') {
-            const itemDate = new Date(item.created_at).toDateString();
-            const today = new Date().toDateString();
-            matchesStatus = matchesStatus && (itemDate === today);
-        }
+        const matchesStatus = (status === targetStatus);
 
         if (!matchesStatus) return false;
 
@@ -487,7 +469,6 @@ export default function DashboardPage() {
                 const lat = pos.coords.latitude;
                 const lng = pos.coords.longitude;
 
-                // ตรวจสอบว่าอยู่ในประเทศไทย
                 if (lat < 5.6 || lat > 20.5 || lng < 97.3 || lng > 105.7) {
                     setIsGettingLocation(false);
                     Swal.fire({
@@ -530,7 +511,7 @@ export default function DashboardPage() {
 
         const valid = files
             .filter(f => f.type.startsWith('image/'))
-            .filter(f => f.size <= 10 * 1024 * 1024) // 10MB limit
+            .filter(f => f.size <= 10 * 1024 * 1024)
             .slice(0, remaining);
 
         if (valid.length < files.length) {
@@ -615,7 +596,6 @@ export default function DashboardPage() {
                 return;
             }
 
-            // Upload images if any
             const incidentId = data.data?.[0]?.id;
             if (selectedFiles.length > 0 && incidentId) {
                 setUploadingImages(true);
@@ -677,7 +657,6 @@ export default function DashboardPage() {
         if (!user) return;
 
         try {
-            // 1. Update Incident Status
             const resIncident = await fetch('/api/incidents', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -685,8 +664,6 @@ export default function DashboardPage() {
             });
 
             if (!resIncident.ok) throw new Error('Failed to update incident status');
-
-            // 2. Create Assignment
             const resAssignment = await fetch('/api/assignments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -707,7 +684,6 @@ export default function DashboardPage() {
                 showConfirmButton: false
             });
 
-            // 3. Refresh Data
             fetchIncidents();
         } catch (err) {
             console.error(err);
@@ -719,7 +695,6 @@ export default function DashboardPage() {
         if (!user) return;
 
         try {
-            // 1. Update Incident Status
             const resIncident = await fetch('/api/incidents', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -727,8 +702,6 @@ export default function DashboardPage() {
             });
 
             if (!resIncident.ok) throw new Error('Failed to update incident status');
-
-            // 2. Update Assignment Status
             const resAssignment = await fetch('/api/assignments', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -739,7 +712,12 @@ export default function DashboardPage() {
                 })
             });
 
-            if (!resAssignment.ok) throw new Error('Failed to update assignment status');
+            if (!resAssignment.ok) {
+                console.warn('Assignment PATCH failed, continuing anyway');
+            }
+
+            await fetchIncidents();
+            setRescueTab('completed');
 
             Swal.fire({
                 icon: 'success',
@@ -748,18 +726,15 @@ export default function DashboardPage() {
                 timer: 1500,
                 showConfirmButton: false
             });
-
-            // 3. Refresh Data
-            fetchIncidents();
         } catch (err) {
             console.error(err);
+            await fetchIncidents();
             Swal.fire('Error', 'เกิดข้อผิดพลาดในการปิดงาน', 'error');
         }
     };
 
     return (
         <div className="dashboard-root">
-            {/* ... Topbar ... */}
             <div className="topbar">
                 <div className="logo">
                     <span className="logo-icon"></span>
@@ -791,7 +766,6 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {/* ... Map Area ... */}
             <div className="main-area">
                 <LeafletMap
                     initialPosition={selectedPosition}
@@ -801,10 +775,8 @@ export default function DashboardPage() {
                 />
             </div>
 
-            {/* ... Bottom Panel ... */}
             <div className="bottom-panel">
                 <div className="incident-list">
-                    {/* Filter out completed and unapproved incidents */}
                     {visibleIncidents.filter(i => i.status !== 'ช่วยเหลือสำเร็จ').slice(0, 5).map((item) => (
                         <div
                             key={item.id}
@@ -828,7 +800,6 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {/* ... Bottom Nav ... */}
             <div className="bottom-nav">
                 <button className="nav-btn" onClick={() => setShowAllReports(true)}>
                     <div className="icon"><Newspaper size={22} /></div>
@@ -871,7 +842,6 @@ export default function DashboardPage() {
                 </button>
             </div>
 
-            {/* ... Report Modal ... */}
             {showReport && !isPickingLocation && (
                 <div className="modal-overlay">
                     <div className="modal">
@@ -938,7 +908,6 @@ export default function DashboardPage() {
                                 )}
                             </div>
 
-                            {/* Image Upload */}
                             <div className="form-group">
                                 <label>
                                     รูปภาพ
@@ -1004,14 +973,12 @@ export default function DashboardPage() {
                 </div>
             )}
 
-            {/* ... Picking Tip ... */}
             {(isPickingLocation || editIsPickingLocation) && (
                 <div className="picking-location-tip">
                     <MapPin size={16} /> แตะบนแผนที่เพื่อระบุจุดเกิดเหตุ
                 </div>
             )}
 
-            {/* ... Settings Modal ... */}
             {showSettings && (
                 <div className="modal-overlay">
                     <div className="modal">
@@ -1059,12 +1026,10 @@ export default function DashboardPage() {
                 </div>
             )}
 
-            {/* All Reports Modal */}
             {showAllReports && (
                 <div className="modal-overlay">
                     <div className="modal modal-scroll modal-reports">
 
-                        {/* Header */}
                         <div className="reports-modal-header">
                             <div className="reports-modal-title">
                                 <ClipboardList size={20} />
@@ -1076,7 +1041,6 @@ export default function DashboardPage() {
                             </button>
                         </div>
 
-                        {/* Search */}
                         <div className="reports-search-wrap">
                             <Search size={15} className="rescue-search-icon" />
                             <input
@@ -1088,7 +1052,6 @@ export default function DashboardPage() {
                             />
                         </div>
 
-                        {/* List */}
                         {visibleIncidents.length === 0 ? (
                             <div className="reports-empty">
                                 <Siren size={36} strokeWidth={1.2} />
@@ -1136,7 +1099,6 @@ export default function DashboardPage() {
                 </div>
             )}
 
-            {/* History Modal */}
             {showHistory && (() => {
                 const userIncidents = [...incidents]
                     .filter(i => i.user_id === user?.id || i.users_app?.id === user?.id)
@@ -1158,7 +1120,6 @@ export default function DashboardPage() {
                     <div className="modal-overlay">
                         <div className="modal modal-scroll modal-history">
 
-                            {/* Header */}
                             <div className="history-header">
                                 <div className="history-header-title">
                                     <ScrollText size={20} />
@@ -1170,7 +1131,6 @@ export default function DashboardPage() {
                                 </button>
                             </div>
 
-                            {/* Body */}
                             {userIncidents.length === 0 ? (
                                 <div className="history-empty">
                                     <ScrollText size={44} strokeWidth={1} />
@@ -1209,7 +1169,6 @@ export default function DashboardPage() {
                                                 </div>
 
                                                 <div className="history-actions">
-                                                    {/* แก้ไข: pending หรือ approved+รอช่วยเหลือ */}
                                                     {(item.approval_status === 'pending' || (!item.approval_status) ||
                                                         (item.approval_status === 'approved' && item.status === 'รอการช่วยเหลือ')) && (
                                                         <button
@@ -1219,7 +1178,6 @@ export default function DashboardPage() {
                                                             <Settings size={13} /> แก้ไข
                                                         </button>
                                                     )}
-                                                    {/* ยกเลิก: เฉพาะ pending */}
                                                     {(item.approval_status === 'pending' || !item.approval_status) && (
                                                         <button
                                                             className="history-cancel-btn"
@@ -1251,7 +1209,6 @@ export default function DashboardPage() {
                 );
             })()}
 
-            {/* Edit Incident Modal */}
             {showEditModal && editingIncident && (
                 <div className="modal-overlay">
                     <div className="modal modal-scroll modal-edit">
@@ -1288,7 +1245,6 @@ export default function DashboardPage() {
                                     </div>
                                 </div>
 
-                                {/* รูปภาพเดิม */}
                                 {(editingIncident.incident_media?.length > 0 || editNewFiles.length > 0) && (
                                     <div className="form-group">
                                         <label>รูปภาพ</label>
@@ -1327,7 +1283,6 @@ export default function DashboardPage() {
                                     </div>
                                 )}
 
-                                {/* เพิ่มรูปถ้ายังไม่มีเลย */}
                                 {!editingIncident.incident_media?.length && editNewFiles.length === 0 && (
                                     <div className="form-group">
                                         <label>รูปภาพ</label>
@@ -1351,7 +1306,6 @@ export default function DashboardPage() {
                 </div>
             )}
 
-            {/* Login Modal */}
             {showLoginModal && (
                 <div className="modal-overlay" onClick={() => { setShowLoginModal(false); setLoginError(""); }}>
                     <div className="modal modal-login" onClick={(e) => e.stopPropagation()}>
@@ -1421,7 +1375,6 @@ export default function DashboardPage() {
                 </div>
             )}
 
-            {/* Register Modal */}
             {showRegisterModal && (
                 <div className="modal-overlay" onClick={() => { setShowRegisterModal(false); resetRegForm(); }}>
                     <div className="modal modal-login modal-register" onClick={(e) => e.stopPropagation()}>
@@ -1514,12 +1467,10 @@ export default function DashboardPage() {
                 </div>
             )}
 
-            {/* Rescue View Modal */}
             {showRescueModal && (
                 <div className="modal-overlay">
                     <div className="modal modal-xl modal-rescue">
 
-                        {/* Header */}
                         <div className="rescue-modal-header">
                             <div className="rescue-modal-title">
                                 <Shield size={20} />
@@ -1531,7 +1482,6 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="rescue-modal-body">
-                            {/* Stats */}
                             <div className="stats-grid">
                                 <div className={`stat-card waiting ${rescueTab === 'waiting' ? 'stat-active' : ''}`} onClick={() => setRescueTab('waiting')}>
                                     <div className="stat-icon"><AlertCircle size={20} /></div>
@@ -1550,7 +1500,6 @@ export default function DashboardPage() {
                                 </div>
                             </div>
 
-                            {/* Search + Sort */}
                             <div className="search-sort-container">
                                 <div className="rescue-search-wrapper">
                                     <Search size={15} className="rescue-search-icon" />
@@ -1572,7 +1521,6 @@ export default function DashboardPage() {
                                 </select>
                             </div>
 
-                            {/* List */}
                             <div className="rescue-list">
                                 {rescueFilteredIncidents.length === 0 ? (
                                     <div className="rescue-empty">

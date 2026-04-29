@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
-  process.env.SUPABASE_URL, // ❗ ใช้ชื่อตรงกับ .env.local
-  process.env.SUPABASE_SERVICE_ROLE_KEY // service role ใช้ฝั่ง server เท่านั้น
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 export async function POST(req) {
@@ -17,7 +17,6 @@ export async function POST(req) {
       );
     }
 
-    // 1) สร้าง user ใน Supabase Auth
     const { data, error } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -30,7 +29,6 @@ export async function POST(req) {
 
     const user = data.user;
 
-    // 2) บันทึกข้อมูลเพิ่มใน table users_app
     const { error: insertError } = await supabase
       .from("users_app")
       .insert([
